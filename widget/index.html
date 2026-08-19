@@ -1,19 +1,48 @@
 <!-- widget/index.html -->
-<div id="lozyska-wyszukiwarka">
-  <form id="lw-form">
-    <label>Średnica wewnętrzna d (mm) <input type="number" step="0.01" id="lw-inner"></label>
-    <label>Średnica zewnętrzna D (mm) <input type="number" step="0.01" id="lw-outer"></label>
-    <label>Szerokość B (mm) <input type="number" step="0.01" id="lw-width"></label>
-    <label>Tolerancja (mm) <input type="number" step="0.01" id="lw-tolerance" value="0.5"></label>
-    <button type="submit">Szukaj</button>
+<div id="lozyska-wyszukiwarka" class="lw-widget">
+  <h2 class="lw-title">Wyszukaj po wymiarach</h2>
+  <form id="lw-form" class="lw-form">
+    <div class="lw-field">
+      <label for="lw-inner">Średnica wewnętrzna</label>
+      <input type="number" step="0.01" id="lw-inner">
+    </div>
+    <div class="lw-field">
+      <label for="lw-outer">Średnica zewnętrzna</label>
+      <input type="number" step="0.01" id="lw-outer">
+    </div>
+    <div class="lw-field">
+      <label for="lw-width">Szerokość</label>
+      <input type="number" step="0.01" id="lw-width">
+    </div>
+    <div class="lw-field">
+      <label for="lw-tolerance">Tolerancja</label>
+      <input type="number" step="0.01" id="lw-tolerance" value="0.9">
+    </div>
+    <button type="submit" class="lw-submit">wyszukaj</button>
   </form>
-  <div id="lw-message"></div>
-  <ul id="lw-results"></ul>
+  <div id="lw-message" class="lw-message"></div>
+  <ul id="lw-results" class="lw-results"></ul>
 </div>
+
+<style>
+  #lozyska-wyszukiwarka.lw-widget { font-family: Arial, Helvetica, sans-serif; max-width: 1100px; }
+  #lozyska-wyszukiwarka .lw-title { font-size: 20px; font-weight: 400; margin: 0 0 14px; padding-bottom: 14px; color: #333; border-bottom: 1px solid #ddd; }
+  #lozyska-wyszukiwarka .lw-form { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 16px; }
+  #lozyska-wyszukiwarka .lw-field { display: flex; flex-direction: column; gap: 6px; flex: 1 1 160px; min-width: 140px; }
+  #lozyska-wyszukiwarka .lw-field label { font-size: 13px; color: #444; }
+  #lozyska-wyszukiwarka .lw-field input { padding: 10px 12px; border: 1px solid #ccc; border-radius: 2px; font-size: 14px; box-sizing: border-box; width: 100%; }
+  #lozyska-wyszukiwarka .lw-submit { flex: 0 0 auto; background: #d0021b; color: #fff; border: none; padding: 12px 32px; font-size: 14px; cursor: pointer; border-radius: 2px; margin-left: auto; }
+  #lozyska-wyszukiwarka .lw-submit:hover { background: #b0011a; }
+  #lozyska-wyszukiwarka .lw-message { margin-top: 12px; color: #555; }
+  #lozyska-wyszukiwarka .lw-results { list-style: none; margin: 16px 0 0; padding: 0; }
+  #lozyska-wyszukiwarka .lw-results li { padding: 10px 0; border-bottom: 1px solid #eee; }
+  #lozyska-wyszukiwarka .lw-results a { color: #333; text-decoration: none; }
+  #lozyska-wyszukiwarka .lw-results a:hover { text-decoration: underline; }
+</style>
 
 <script>
 (function () {
-  var DATA_URL = 'https://TWOJ-USER.github.io/TWOJE-REPO/data.json';
+  var DATA_URL = 'https://kamilosxp.me/stozek-searcher/data.json';
 
   function matchProducts(products, criteria) {
     var tolerance = criteria.tolerance == null ? 0 : criteria.tolerance;
