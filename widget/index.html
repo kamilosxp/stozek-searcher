@@ -1,9 +1,9 @@
 <!-- widget/index.html -->
 <div id="lozyska-wyszukiwarka">
   <form id="lw-form">
-    <label>Średnica wewnętrzna d (mm) <input type="number" step="0.01" id="lw-d"></label>
-    <label>Średnica zewnętrzna D (mm) <input type="number" step="0.01" id="lw-D"></label>
-    <label>Szerokość B (mm) <input type="number" step="0.01" id="lw-B"></label>
+    <label>Średnica wewnętrzna d (mm) <input type="number" step="0.01" id="lw-inner"></label>
+    <label>Średnica zewnętrzna D (mm) <input type="number" step="0.01" id="lw-outer"></label>
+    <label>Szerokość B (mm) <input type="number" step="0.01" id="lw-width"></label>
     <label>Tolerancja (mm) <input type="number" step="0.01" id="lw-tolerance" value="0.5"></label>
     <button type="submit">Szukaj</button>
   </form>
@@ -39,6 +39,7 @@
   }
 
   var products = null;
+  var loadFailed = false;
   var messageEl = document.getElementById('lw-message');
   var resultsEl = document.getElementById('lw-results');
   var formEl = document.getElementById('lw-form');
@@ -46,7 +47,10 @@
   fetch(DATA_URL)
     .then(function (res) { if (!res.ok) throw new Error('bad status'); return res.json(); })
     .then(function (data) { products = data; })
-    .catch(function () { messageEl.textContent = 'Wyszukiwarka chwilowo niedostępna.'; });
+    .catch(function () {
+      loadFailed = true;
+      messageEl.textContent = 'Wyszukiwarka chwilowo niedostępna.';
+    });
 
   function numOrUndefined(value) {
     return value === '' ? undefined : Number(value);
@@ -58,14 +62,16 @@
     messageEl.textContent = '';
 
     if (!products) {
-      messageEl.textContent = 'Wyszukiwarka chwilowo niedostępna.';
+      messageEl.textContent = loadFailed
+        ? 'Wyszukiwarka chwilowo niedostępna.'
+        : 'Dane się jeszcze ładują, spróbuj za chwilę.';
       return;
     }
 
     var criteria = {
-      d: numOrUndefined(document.getElementById('lw-d').value),
-      D: numOrUndefined(document.getElementById('lw-D').value),
-      B: numOrUndefined(document.getElementById('lw-B').value),
+      d: numOrUndefined(document.getElementById('lw-inner').value),
+      D: numOrUndefined(document.getElementById('lw-outer').value),
+      B: numOrUndefined(document.getElementById('lw-width').value),
       tolerance: numOrUndefined(document.getElementById('lw-tolerance').value),
     };
 

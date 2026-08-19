@@ -41,6 +41,25 @@ test('does not write anything if fetchProducts fails', async () => {
   assert.equal(writes.length, 0);
 });
 
+test('refuses to write and rejects if every product is mapped to null', async () => {
+  const writes = [];
+  const logs = [];
+  await assert.rejects(
+    () =>
+      generateData({
+        token: 'fake',
+        outPath: '/fake/data.json',
+        fetchProductsFn: async () => [{ id: 'raw-1' }, { id: 'raw-2' }, { id: 'raw-3' }],
+        mapProductFn: () => null,
+        writeFileFn: async (path, content) => writes.push({ path, content }),
+        logFn: (msg) => logs.push(msg),
+      }),
+    /0 bearings mapped/,
+  );
+
+  assert.equal(writes.length, 0);
+});
+
 test('throws if token is missing', async () => {
   await assert.rejects(
     () =>

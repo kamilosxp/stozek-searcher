@@ -28,6 +28,30 @@ test('maps a valid bearing product with confirmed real dimensions', () => {
   });
 });
 
+test('maps a dimension value using a Polish decimal comma', () => {
+  const commaDecimal = {
+    product_id: '21366',
+    category_id: '142',
+    translations: {
+      pl_PL: {
+        name: 'Łożyska 32013 X FAG',
+        permalink: 'https://www.stozek.pl/pl/p/Lozyska-32013-X-FAG/21366',
+      },
+    },
+    stock: { price: '120.00' },
+    attributes: { '3': { '16': '23', '20': '60,5', '21': '95' } },
+  };
+  assert.deepEqual(mapProduct(commaDecimal), {
+    id: '21366',
+    name: 'Łożyska 32013 X FAG',
+    url: 'https://www.stozek.pl/pl/p/Lozyska-32013-X-FAG/21366',
+    price: 120,
+    d: 60.5,
+    D: 95,
+    B: 23,
+  });
+});
+
 test('rejects product outside bearing categories even with attribute group 3 present', () => {
   const wpust = {
     product_id: '36092',

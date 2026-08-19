@@ -14,6 +14,10 @@ async function generateData(options) {
     else skipped += 1;
   }
 
+  if (mapped.length === 0) {
+    throw new Error(`Refusing to write: 0 bearings mapped from ${rawProducts.length} raw products`);
+  }
+
   await writeFileFn(outPath, JSON.stringify(mapped));
   logFn(`Zapisano ${mapped.length} łożysk, pominięto ${skipped} produktów.`);
 

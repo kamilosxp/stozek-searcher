@@ -3,7 +3,8 @@ const BEARING_CATEGORY_IDS = new Set(['138', '139', '140', '141', '142', '143', 
 
 function toPositiveNumber(value) {
   if (value === undefined || value === null || value === '') return null;
-  const n = Number(value);
+  const normalized = typeof value === 'string' ? value.replace(',', '.') : value;
+  const n = Number(normalized);
   return Number.isFinite(n) && n > 0 ? n : null;
 }
 
