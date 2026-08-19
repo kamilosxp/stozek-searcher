@@ -37,23 +37,31 @@ test('combines multiple dimensions, all must match', () => {
 });
 
 test('sorts results by ascending total deviation', () => {
-  // d=60.5 gives product 1 (d=60) a deviation of 0.5 and product 2 (d=62) a
-  // deviation of 1.5 -- genuinely different, so this actually exercises the
-  // sort (unlike a tied-deviation case, which would pass even without it).
-  const result = matchProducts(products, { d: 60.5, tolerance: 2 });
-  assert.deepEqual(result.results.map((r) => r.id), ['1', '2']);
-  assert.equal(result.results[0].deviation, 0.5);
-  assert.equal(result.results[1].deviation, 1.5);
+  // d=61.8 gives product 1 (d=60) a deviation of 1.8 and product 2 (d=62) a
+  // deviation of 0.2 -- genuinely different values, AND the correct order
+  // (['2', '1']) is the reverse of the products' input order (['1', '2']).
+  // That matters: a target equidistant-ish value like 60.5 would give
+  // product 1 the smaller deviation, which is also its natural array
+  // position -- so that case would pass even with `results.sort(...)`
+  // deleted entirely. This target actually requires the sort to run.
+  const result = matchProducts(products, { d: 61.8, tolerance: 2 });
+  assert.deepEqual(result.results.map((r) => r.id), ['2', '1']);
+  assert.ok(Math.abs(result.results[0].deviation - 0.2) < 1e-9);
+  assert.ok(Math.abs(result.results[1].deviation - 1.8) < 1e-9);
   assert.ok(result.results[0].deviation < result.results[1].deviation);
 });
 
 test('sums deviation across two filtered dimensions when sorting', () => {
-  // product 1: |60.2-60| + |94-95| = 0.2 + 1 = 1.2
-  // product 2: |60.2-62| + |94-95| = 1.8 + 1 = 2.8
-  const result = matchProducts(products, { d: 60.2, D: 94, tolerance: 3 });
-  assert.deepEqual(result.results.map((r) => r.id), ['1', '2']);
-  assert.ok(Math.abs(result.results[0].deviation - 1.2) < 1e-9);
-  assert.ok(Math.abs(result.results[1].deviation - 2.8) < 1e-9);
+  // Both products share D=95, so the D term is a constant 0 offset here;
+  // the ordering is still driven by the summed deviation across both
+  // filtered dimensions, and (as above) the correct order ['2', '1'] is
+  // the reverse of input order, so a deleted or reversed sort would fail.
+  // product 1: |61.8-60| + |95-95| = 1.8 + 0 = 1.8
+  // product 2: |61.8-62| + |95-95| = 0.2 + 0 = 0.2
+  const result = matchProducts(products, { d: 61.8, D: 95, tolerance: 2 });
+  assert.deepEqual(result.results.map((r) => r.id), ['2', '1']);
+  assert.ok(Math.abs(result.results[0].deviation - 0.2) < 1e-9);
+  assert.ok(Math.abs(result.results[1].deviation - 1.8) < 1e-9);
   assert.ok(result.results[0].deviation < result.results[1].deviation);
 });
 

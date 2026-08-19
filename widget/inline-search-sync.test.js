@@ -59,10 +59,12 @@ test('inline matchProducts (index.html): returns NO_CRITERIA error when no dimen
 });
 
 test('inline matchProducts (index.html): sorts results by ascending total deviation', () => {
-  // d=60.5 gives product 1 (d=60) a deviation of 0.5 and product 2 (d=62) a
-  // deviation of 1.5 -- genuinely different values, so this actually
-  // exercises the sort rather than passing on tied input order.
-  const result = matchProducts(products, { d: 60.5, tolerance: 2 });
-  assert.deepEqual(result.results.map((r) => r.id), ['1', '2']);
+  // d=61.8 puts product 2 (d=62) closer than product 1 (d=60), so the
+  // correct order ['2', '1'] is the reverse of the fixture's input order
+  // -- proving the sort actually runs, not just that input order survived.
+  // See widget/search.test.js for the matching case against the tested
+  // (non-inline) copy of matchProducts.
+  const result = matchProducts(products, { d: 61.8, tolerance: 2 });
+  assert.deepEqual(result.results.map((r) => r.id), ['2', '1']);
   assert.ok(result.results[0].deviation < result.results[1].deviation);
 });
