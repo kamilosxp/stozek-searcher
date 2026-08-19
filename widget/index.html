@@ -1,0 +1,94 @@
+<!-- widget/index.html -->
+<div id="lozyska-wyszukiwarka">
+  <form id="lw-form">
+    <label>Średnica wewnętrzna d (mm) <input type="number" step="0.01" id="lw-d"></label>
+    <label>Średnica zewnętrzna D (mm) <input type="number" step="0.01" id="lw-D"></label>
+    <label>Szerokość B (mm) <input type="number" step="0.01" id="lw-B"></label>
+    <label>Tolerancja (mm) <input type="number" step="0.01" id="lw-tolerance" value="0.5"></label>
+    <button type="submit">Szukaj</button>
+  </form>
+  <div id="lw-message"></div>
+  <ul id="lw-results"></ul>
+</div>
+
+<script>
+(function () {
+  var DATA_URL = 'https://TWOJ-USER.github.io/TWOJE-REPO/data.json';
+
+  function matchProducts(products, criteria) {
+    var tolerance = criteria.tolerance == null ? 0 : criteria.tolerance;
+    var dims = ['d', 'D', 'B'].filter(function (key) {
+      return criteria[key] !== undefined && criteria[key] !== null && criteria[key] !== '';
+    });
+    if (dims.length === 0) return { error: 'NO_CRITERIA', results: [] };
+
+    var results = [];
+    products.forEach(function (product) {
+      var matches = true;
+      var deviation = 0;
+      for (var i = 0; i < dims.length; i += 1) {
+        var key = dims[i];
+        var diff = Math.abs(product[key] - criteria[key]);
+        if (diff > tolerance) { matches = false; break; }
+        deviation += diff;
+      }
+      if (matches) results.push(Object.assign({}, product, { deviation: deviation }));
+    });
+    results.sort(function (a, b) { return a.deviation - b.deviation; });
+    return { error: null, results: results };
+  }
+
+  var products = null;
+  var messageEl = document.getElementById('lw-message');
+  var resultsEl = document.getElementById('lw-results');
+  var formEl = document.getElementById('lw-form');
+
+  fetch(DATA_URL)
+    .then(function (res) { if (!res.ok) throw new Error('bad status'); return res.json(); })
+    .then(function (data) { products = data; })
+    .catch(function () { messageEl.textContent = 'Wyszukiwarka chwilowo niedostępna.'; });
+
+  function numOrUndefined(value) {
+    return value === '' ? undefined : Number(value);
+  }
+
+  formEl.addEventListener('submit', function (event) {
+    event.preventDefault();
+    resultsEl.innerHTML = '';
+    messageEl.textContent = '';
+
+    if (!products) {
+      messageEl.textContent = 'Wyszukiwarka chwilowo niedostępna.';
+      return;
+    }
+
+    var criteria = {
+      d: numOrUndefined(document.getElementById('lw-d').value),
+      D: numOrUndefined(document.getElementById('lw-D').value),
+      B: numOrUndefined(document.getElementById('lw-B').value),
+      tolerance: numOrUndefined(document.getElementById('lw-tolerance').value),
+    };
+
+    var outcome = matchProducts(products, criteria);
+
+    if (outcome.error === 'NO_CRITERIA') {
+      messageEl.textContent = 'Wpisz przynajmniej jeden wymiar.';
+      return;
+    }
+
+    if (outcome.results.length === 0) {
+      messageEl.textContent = 'Brak łożysk w tym zakresie.';
+      return;
+    }
+
+    outcome.results.forEach(function (r) {
+      var li = document.createElement('li');
+      var a = document.createElement('a');
+      a.href = r.url;
+      a.textContent = r.name + ' — d:' + r.d + ' D:' + r.D + ' B:' + r.B + ' — ' + r.price + ' zł';
+      li.appendChild(a);
+      resultsEl.appendChild(li);
+    });
+  });
+})();
+</script>
